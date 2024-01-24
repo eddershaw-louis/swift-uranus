@@ -1,0 +1,34 @@
+planet = woma.Planet( 
+    name            = "1M Impactor v1_1", 
+    A1_mat_layer    = ["HM80_rock", "HM80_ice"], 
+    A1_T_rho_type   = ["power=0", "power=0.9"], 
+    P_s             = 1e9, 
+    T_s             = 550, 
+    A1_M_layer      = [0.1729 * M_earth, 0.8271 * M_earth]
+)
+
+planet.gen_prof_L2_find_R_R1_given_M1_M2(R_min=1.7*R_earth, R_max=1.9*R_earth)
+
+
+
+Planet "1M Impactor v1_1":
+    M            = 5.9717e+24  kg  = 0.99988  M_earth
+    R            = 1.1612e+07  m  = 1.8227  R_earth
+    mat          = ["HM80_rock", "HM80_ice"]
+    mat_id       = [202, 201]
+    T_rho_type   = ["power=0", "power=0.9"]
+    R_layer      = [0.57473, 1.8227]  R_earth
+    M_layer      = [0.173, 0.82688]  M_earth
+    M_frac_layer = [0.17302, 0.82698]  M_tot
+    idx_layer    = [315, 999]
+    P_s          = 1e+09  Pa
+    T_s          = 550  K
+    rho_s        = 305.37  kg m^-3
+    P_1          = 3.0055e+10  Pa
+    T_1          = 2317  K
+    rho_1        = 4540.8  kg m^-3
+    P_0          = 8.1526e+10  Pa
+    T_0          = 2317  K
+    rho_0        = 5577.6  kg m^-3
+    I_MR2        = 0.2907  M_tot*R_tot^2
+Particle resolution: 68657
