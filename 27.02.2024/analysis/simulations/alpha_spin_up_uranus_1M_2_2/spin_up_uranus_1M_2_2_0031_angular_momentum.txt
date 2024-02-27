@@ -1,0 +1,17 @@
+Angular Momentum
+[ 2.93175457e+31 -7.76856564e+31  1.10892751e+36]	 kg m^2 s^-1
+1.1089275104997284e+36					 kg m^2 s^-1
+[ 2.64377477e-05 -7.00547652e-05  9.99999997e-01]	 normalised
+
+Looking down the y axis:
+( X
+  ^
+  |
+ (.)---> Z)
+
+0.004290158798082635 degrees from z axis as projected into the x,z plane (-ve angle means pointing towards -ve X)
+90.00401384238654 degrees from y axis
+
+Angular Frequency and Period
+7.91821975245605e-05 rad s^-1
+22.041940064279835 hours

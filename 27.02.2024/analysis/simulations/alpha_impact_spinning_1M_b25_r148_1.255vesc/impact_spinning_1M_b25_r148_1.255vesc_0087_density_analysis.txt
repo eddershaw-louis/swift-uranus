@@ -1,0 +1,3 @@
+['density_analysis.py', 'simulations/impact_spinning_1M_b25_r148_1.255vesc/impact_spinning_1M_b25_r148_1.255vesc_0087.hdf5', '-df', '2']
+
+Density floor of 2.0 g/cm^3 reached at 9.045845669953993 R_earth

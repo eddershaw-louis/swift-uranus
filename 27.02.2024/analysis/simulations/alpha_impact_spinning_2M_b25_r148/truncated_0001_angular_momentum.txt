@@ -1,0 +1,23 @@
+Script arguments:
+['angular_momentum.py', 'simulations/impact_spinning_2M_b25_r148/truncated_0001.hdf5', '-ref', '-9.208770901358282e-05', '0.5299192619867386', '-0.8480480925603714']
+
+Angular Momentum
+[-8.87981647e+33  5.31147263e+35  1.83608690e+36]	 kg m^2 s^-1
+1.9113899007298035e+36					 kg m^2 s^-1
+[-0.00464574  0.27788536  0.96060301]	 normalised
+
+Looking down the y axis:
+( X
+  ^
+  |
+ (.)---> Z)
+
+-0.27709583977108376 degrees from z axis as projected into the x,z plane (-ve angle means pointing towards -ve X)
+73.86596339143826 degrees from y axis
+
+Angle from reference vector: ([-9.20877090e-05  5.29919262e-01 -8.48048093e-01])
+131.86519728704474 degrees
+
+Angular Frequency and Period
+8.826690116759062e-05 rad s^-1
+19.773315126136662 hours
