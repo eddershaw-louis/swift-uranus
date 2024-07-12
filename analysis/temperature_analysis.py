@@ -1,24 +1,14 @@
-###############################################################################
-# This file is part of SWIFT.
-# Copyright (c) 2019 Jacob Kegerreis (jacob.kegerreis@durham.ac.uk)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published
-# by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
-# Plot the snapshots from the example giant impact on the proto-Earth, showing
-# the particles in a thin slice near z=0, coloured by their material.
+#################################################################
+#								#
+#								#
+#		Would a Mighty Smack Tilt Uranus?		#
+#								#
+#		Louis Eddershaw					#
+#								#
+#		2023/24						#
+#								#
+#								#
+#################################################################
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,10 +16,10 @@ import numpy as np
 import swiftsimio as sw
 import unyt
 
-import glob
 import sys
-import os
 import math
+import numpy as np
+from scipy.ndimage import uniform_filter1d
 
 import woma
 
@@ -49,62 +39,250 @@ params = {
     "font.family": "serif",
 }
 matplotlib.rcParams.update(params)
+plt.rcParams["mathtext.fontset"] = "cm"
 
 
-def plot_radius(positions):
-	radii = []
-	for snapshot in positions:
-		snapshotArray = snapshot.astype(np.float64)
-		radius = float((snapshotArray.max() - snapshotArray.min()).to_value()) / 2
-		radii.append(radius)
-	
-	plt.figure(figsize=(10,10))
-	ax = plt.gca()
+R_earth = 6.371e6
 
-	plt.plot(np.linspace(0, len(radii) * 300, len(radii)), radii)
-
-	plt.ylabel(r"Radius [$R_\oplus$]")
-	plt.xlabel("Time [s]")
-	plt.savefig("visualised/analysis/Radius_vs_time.png")
-	plt.close()
-	
-	
-
+## Read in hdf5 filename
 if (len(sys.argv) > 1):
-	simulation_name = sys.argv[1]
+	filepath = sys.argv[1]
 else:
-	simulation_name = input("Enter the name of the simulation: ")
+	filepath = input("Filepath of the hdf5 file to analyse: ")
 
-#assumed_ax_lim = True
-#if (len(sys.argv) > 2):
-#	ax_lim = float(sys.argv[2])
-#else:
-#	ax_lim_input = input("Axis limit (R_e): ")
-#	if ax_lim_input != "":
-#		ax_lim = float(ax_lim_input)
-#		assumed_ax_lim = False
-#	else:
-#		ax_lim = -1
+## Read in the truncation radius of particles from the origin if requested
+if ('-r' in sys.argv):
+	max_radius = float(sys.argv[sys.argv.index('-r') + 1])
+else:
+	max_radius = -1
 
-snapshot_path = "/data/cluster4/hd20558/simulations/{0}/output/{0}_*.hdf5".format(simulation_name)
-output_path = "/home/hd20558/files/simulations/{0}/analysis/".format(simulation_name)
+## Read in the smoothing window width if requested
+if ('-w' in sys.argv):
+	window_width = int(sys.argv[sys.argv.index('-w') + 1])
+else:
+	window_width = 25
 
-snapshots = glob.glob(snapshot_path)
-snapshots.sort()
+## Read in whether the plots should be in log scale or not
+if ('-log' in sys.argv):
+	log_plot = True
+else:
+	log_plot = False
 
-num_of_snapshots = len(snapshots)
-oom = int(math.floor(math.log10(num_of_snapshots)))
-snapshot_number_sig_fig = oom + 2
+## Read in the number of particles in the proto-Uranus if requested
+if ('-n' in sys.argv):
+	target_particles = int(sys.argv[sys.argv.index('-n') + 1])
+else:
+	target_particles = -1
 
-if os.path.exists(output_path) == False:
-	os.makedirs(output_path)
 
+file_start = 0
+for i in range(len(filepath)):
+	if filepath[-i] == "/":
+		file_start = -i
+		break
+output_path = "{0}".format(filepath[:file_start])
+
+## Load in EoS tables from WoMa
 woma.load_eos_tables()
 
-temperatures = []
-for snapshot_id in range(num_of_snapshots):
+## Load in particles
+pos, vel, h, m, rho, p, u, mat_id, R = custom_woma.load_to_woma(filepath, num_target_particles = target_particles)
 
-	pos, vel, h, m, rho, p, u, mat_id, R = custom_woma.load_to_woma(snapshots[snapshot_id])
-	temperatures.append(woma.eos.eos.A1_T_u_rho(u, rho, mat_id))
 
-print(temperatures[-1])
+## Offset particles such that the centre of mass is situated at the origin
+pos_r = np.sqrt(np.sum(pos**2, axis=1)) / R_earth 
+
+com_truncate_mask = np.where(pos_r <= 25)[0]
+temp_pos = pos[com_truncate_mask]
+temp_m = m[com_truncate_mask]
+
+com = np.sum(temp_m[:, np.newaxis] * temp_pos, axis=0) / (np.sum(temp_m))
+
+pos -= com
+
+
+## Mask particles that come from the impactor
+impactor_indices = mat_id > 400
+
+
+target_pos = pos[~impactor_indices]
+target_vel = vel[~impactor_indices]
+target_m = m[~impactor_indices]
+target_rho = rho[~impactor_indices]
+target_p = p[~impactor_indices]
+target_u = u[~impactor_indices]
+target_mat_id = mat_id[~impactor_indices]
+
+impactor_pos = pos[impactor_indices]
+impactor_vel = vel[impactor_indices]
+impactor_m = m[impactor_indices]
+impactor_rho = rho[impactor_indices]
+impactor_p = p[impactor_indices]
+impactor_u = u[impactor_indices]
+impactor_mat_id = mat_id[impactor_indices] - 200000000
+
+target_pos_r = np.sqrt(np.sum(target_pos**2, axis=1)) / R_earth
+impactor_pos_r = np.sqrt(np.sum(impactor_pos**2, axis=1)) / R_earth
+
+## Mask out particles that are below the maximum truncation radius
+if max_radius != -1:
+	mask = np.where(target_pos_r < max_radius)[0]
+	target_pos_r = target_pos_r[mask]
+	target_u = target_u[mask]
+	target_rho = target_rho[mask]
+	target_mat_id = target_mat_id[mask]
+
+	mask = np.where(impactor_pos_r < max_radius)[0]
+	impactor_pos_r = impactor_pos_r[mask]
+	impactor_u = impactor_u[mask]
+	impactor_rho = impactor_rho[mask]
+	impactor_mat_id = impactor_mat_id[mask]
+
+
+## Compute the temperature of the particles from the particles' internal energy and density, using the relevant EoS
+target_temperatures = woma.eos.eos.A1_T_u_rho(target_u, target_rho, target_mat_id) / 10000
+impactor_temperatures = woma.eos.eos.A1_T_u_rho(impactor_u, impactor_rho, impactor_mat_id) / 10000
+
+## Sort particles by radial distance from origin
+sort = np.argsort(target_pos_r)
+target_pos_r = target_pos_r[sort]
+target_temperatures = target_temperatures[sort]
+target_mat_id = target_mat_id[sort]
+
+sort = np.argsort(impactor_pos_r)
+impactor_pos_r = impactor_pos_r[sort]
+impactor_temperatures = impactor_temperatures[sort]
+impactor_mat_id = impactor_mat_id[sort]
+
+
+## Smooth temperatures with running average
+target_running_average_temperatures = uniform_filter1d(target_temperatures, size=window_width, mode="nearest")
+impactor_running_average_temperatures = uniform_filter1d(impactor_temperatures, size=window_width//2, mode="nearest")
+
+
+impactor_mat_id += 200000000
+
+target_colour = np.empty(len(target_pos_r), dtype=object)
+target_sizes = np.ones(len(target_pos_r)) * 13
+impactor_colour = np.empty(len(impactor_pos_r), dtype=object)
+impactor_sizes = np.ones(len(impactor_pos_r)) * 13
+
+## Colour particles by their material type (including offsetting colours from impactor)
+for id_c, c in material_colour_map.ID_COLOUR_MAP.items():
+	target_colour[target_mat_id == id_c] = c
+	impactor_colour[impactor_mat_id == id_c] = c
+
+
+
+reduce_points = 1
+
+## Plot raw temperatures against radial position for both impactor and proto-Uranus
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(target_pos_r[::reduce_points], target_temperatures[::reduce_points], s=18, c=target_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Temperature [$10^4$ K]")
+#plt.xlim(-max_radius*0.05, max_radius)
+plt.xlim(2, 3.5)
+plt.ylim(-0.5, 10)
+plt.tight_layout()
+plt.savefig("{0}/target_raw_temperatures.png".format(output_path), dpi=300)
+plt.close()
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(impactor_pos_r[::reduce_points], impactor_temperatures[::reduce_points], s=18, c=impactor_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.ylim(-0.5, 10)
+plt.tight_layout()
+plt.savefig("{0}/impactor_raw_temperatures.png".format(output_path), dpi=300)
+plt.close()
+
+
+for id_c, c in material_colour_map.ID_COLOUR_MAP.items():
+	target_colour[target_mat_id == id_c] = c
+	impactor_colour[impactor_mat_id == id_c] = c
+
+## Plot the smoothed temperatures against radial position for both impactor and proto-Uranus
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(target_pos_r[::reduce_points], target_running_average_temperatures[::reduce_points], s=target_sizes, c=target_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Averaged Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.ylim(-0.5, 10)
+plt.tight_layout()
+plt.savefig("{0}/target_averaged_temperature.png".format(output_path), dpi=300)
+plt.close()
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(impactor_pos_r[::reduce_points], impactor_running_average_temperatures[::reduce_points], s=impactor_sizes, c=impactor_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Averaged Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.ylim(-0.5, 10)
+plt.tight_layout()
+plt.savefig("{0}/impactor_averaged_temperature.png".format(output_path), dpi=300)
+plt.close()
+
+
+## Do the same again, but this time combine the impactor and proto-Uranus particles together (makes a slight difference to the smoothing process)
+
+combined_pos_r = np.concatenate((target_pos_r, impactor_pos_r))
+combined_temperatures = np.concatenate((target_temperatures, impactor_temperatures))
+combined_post_running_average_temperatures = np.concatenate((target_running_average_temperatures, impactor_running_average_temperatures))
+combined_colour = np.concatenate((target_colour, impactor_colour))
+combined_sizes = np.concatenate((target_sizes, impactor_sizes))
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(combined_pos_r[::reduce_points], combined_temperatures[::reduce_points], s=combined_sizes, c=combined_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.ylim(-0.5, 10)
+plt.tight_layout()
+plt.savefig("{0}/combined_raw_temperatures.png".format(output_path), dpi=300)
+plt.close()
+
+
+
+sort = np.argsort(combined_pos_r)
+combined_pre_pos_r = combined_pos_r[sort]
+combined_pre_temperatures = combined_temperatures[sort]
+combined_pre_colour = combined_colour[sort]
+combined_pre_running_average_temperatures = uniform_filter1d(combined_pre_temperatures, size=window_width, mode="nearest")
+
+
+
+
+
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(combined_pos_r[::reduce_points], combined_post_running_average_temperatures[::reduce_points], s=18, c=combined_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Averaged Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.tight_layout()
+plt.savefig("{0}/combined_post_averaged_temperatures.png".format(output_path), dpi=300)
+plt.close()
+
+fig = plt.figure(figsize=(7,6))
+plt.scatter(combined_pre_pos_r[::reduce_points], combined_pre_running_average_temperatures[::reduce_points], s=18, c=combined_pre_colour[::reduce_points], alpha=0.75, linewidth=0)
+if log_plot: plt.yscale("log")
+plt.xlabel(r"Radius [R$_\oplus$]")
+plt.ylabel(r"Averaged Temperature [$10^4$ K]")
+plt.xlim(-max_radius*0.05, max_radius)
+plt.tight_layout()
+plt.savefig("{0}/combined_pre_averaged_temperatures.png".format(output_path), dpi=300)
+plt.close()
+
+
+
+

@@ -1,0 +1,45 @@
+planet = woma.Planet( 
+    name            = "3 Layer Uranus v2 Current Day", 
+    A1_mat_layer    = ["ANEOS_forsterite", "AQUA", "HM80_HHe"], 
+    A1_T_rho_type   = ["entropy=4047", "adiabatic", "adiabatic"], 
+    P_s             = 1e5, 
+    T_s             = 60, 
+    M               = 14.54 * M_earth, 
+    A1_R_layer      = [None, None, 3.98 * R_earth], 
+    I_MR2           = 0.184
+)
+
+planet.gen_prof_L3_find_R1_R2_given_M_R_I(R_1_min=0.9*R_earth, R_1_max=1.1*R_earth)
+
+
+
+
+
+
+Planet "3 Layer Uranus v2 Current Day":
+    M            = 8.713e+25  kg  = 14.589  M_earth
+    R            = 2.5357e+07  m  = 3.98  R_earth
+    mat          = ["ANEOS_forsterite", "AQUA", "HM80_HHe"]
+    mat_id       = [400, 304, 200]
+    T_rho_type   = ["entropy=4047", "adiabatic", "adiabatic"]
+    R_layer      = [1.0119, 2.7171, 3.98]  R_earth
+    M_layer      = [1.6328, 11.483, 1.4735]  M_earth
+    M_frac_layer = [0.11192, 0.78708, 0.101]  M_tot
+    idx_layer    = [254, 682, 999]
+    P_s          = 1e+05  Pa
+    T_s          = 60  K
+    rho_s        = 0.35445  kg m^-3
+    P_2          = 2.4543e+10  Pa
+    T_2          = 2973.7  K
+    rho_2        = 1830.2  kg m^-3
+    P_1          = 7.1276e+11  Pa
+    T_1          = 7207.2  K
+    rho_1        = 8082.3  kg m^-3
+    P_0          = 1.1824e+12  Pa
+    T_0          = 8781.5  K
+    rho_0        = 9471.8  kg m^-3
+    I_MR2        = 0.18381  M_tot*R_tot^2
+Particle resolution: 10000000
+Name of particle file: uranus_current_day
+
+num_particle = 10345357

@@ -1,3 +1,15 @@
+#################################################################
+#								#
+#								#
+#		Would a Mighty Smack Tilt Uranus?		#
+#								#
+#		Louis Eddershaw					#
+#								#
+#		2023/24						#
+#								#
+#								#
+#################################################################
+
 import womaplotting
 import woma
 import h5py
@@ -16,30 +28,45 @@ sys.path.append("../..")
 
 from custom_functions import custom_woma
 
-#	       M_t      M_i     R_t    R_i   B    r                target_file                                impactor_file
-PARAMETERS = [13.566, 0.99917, 3.98, 1.5702, 25, 22, "pre_damping_uranus_-1M_relaxation_0048.hdf5", "pre_damping_1M_relaxation_v1_1_long_1000.hdf5"]
+#	       M_t       M_i    R_t   R_i    B   r   v                 target_file                   impactor_file
+#PARAMETERS = [14.044, 0.49996, 3.98, 1.1605, 30, 22, 1.0,  "hotel_spinning_uranus_0.5M_r158.hdf5", "impactor_0.5M.hdf5"]
+#PARAMETERS = [13.974, 0.59978, 3.98, 1.2218, 30, 22, 1.0,  "hotel_spinning_uranus_0.6M_r158.hdf5", "impactor_0.6M.hdf5"]
+#PARAMETERS = [13.899, 0.69967, 3.98, 1.2756, 30, 22, 1.0,  "hotel_spinning_uranus_0.7M_r158.hdf5", "impactor_0.7M.hdf5"]
+#PARAMETERS = [13.836, 0.74997, 3.98, 1.3002, 30, 22, 1.0, "hotel_spinning_uranus_0.75M_r158.hdf5", "impactor_0.75M.hdf5"]
+PARAMETERS = [13.732, 0.87435, 3.98, 1.3567, 30, 22, 1.0, "hotel_spinning_uranus_0.875M_r138.hdf5", "impactor_0.875M.hdf5"]
+#PARAMETERS = [13.591, 0.99962, 3.98, 1.4073, 30, 22, 1.0,    "hotel_spinning_uranus_1M_r158.hdf5", "impactor_1M.hdf5"]
+#PARAMETERS = [13.444, 1.1243,  3.98, 1.4529, 30, 22, 1.0,"hotel_spinning_uranus_1.125M_r158.hdf5", "impactor_1.125M.hdf5"]
+#PARAMETERS = [13.325, 1.2493,  3.98, 1.4947, 30, 22, 1.0, "hotel_spinning_uranus_1.25M_r158.hdf5", "impactor_1.25M.hdf5"]
+#PARAMETERS = [13.055, 1.4999,  3.98, 1.5692, 30, 22, 1.0,  "hotel_spinning_uranus_1.5M_r158.hdf5", "impactor_1.5M.hdf5"]
+#PARAMETERS = [12.825, 1.7499,  3.98, 1.6327, 30, 22, 1.0, "hotel_spinning_uranus_1.75M_r158.hdf5", "impactor_1.75M.hdf5"]
+#PARAMETERS = [12.577, 1.9983,  3.98, 1.6893, 30, 22, 1.0,    "beta_spinning_uranus_2M_r148.hdf5", "impactor_2M.hdf5"]
 
-
+## Read in parameters
 M_t = PARAMETERS[0] * M_earth
 M_i = PARAMETERS[1] * M_earth
 R_t = PARAMETERS[2] * R_earth
 R_i = PARAMETERS[3] * R_earth
 B = PARAMETERS[4]
 separation = PARAMETERS[5] * R_earth
-target_filename = PARAMETERS[6]
-impactor_filename = PARAMETERS[7]
+v_esc_multiplier = PARAMETERS[6]
+target_filename = PARAMETERS[7]
+impactor_filename = PARAMETERS[8]
 target_filepath = "impact_files/{0}".format(target_filename)
 impactor_filepath = "impact_files/{0}".format(impactor_filename)
 
-v_esc = np.sqrt(2 * G * (M_t + M_i) / (R_t + R_i))
+## Calculate the mutual escape velocity
+v_esc = np.sqrt(2 * G * (M_t + M_i) / (R_t + R_i)) 
 print("v_esc", v_esc)
+v_c = v_esc_multiplier * v_esc
+print("Contact velocity", v_c, "\n")
 
-A1_pos_t = np.array([0., 0., 0.])
-A1_vel_t = np.array([0., 0., 0.])
+impact_pos_t = np.array([0., 0., 0.])
+impact_vel_t = np.array([0., 0., 0.])
 
-A1_pos_i, A1_vel_i = woma.impact_pos_vel_b_v_c_r(
+## Compute the initial configuration that satisfies the impact parameters
+impact_pos_i, impact_vel_i = woma.impact_pos_vel_b_v_c_r(
     b       = np.sin(B * np.pi/180), 
-    v_c     = v_esc, 
+    v_c     = v_c, 
     r       = separation, 
     R_t     = R_t, 
     R_i     = R_i, 
@@ -49,92 +76,55 @@ A1_pos_i, A1_vel_i = woma.impact_pos_vel_b_v_c_r(
 
 
 # Centre of mass
-A1_pos_com = (M_t * A1_pos_t + M_i * A1_pos_i) / (M_t + M_i)
-A1_pos_t -= A1_pos_com
-A1_pos_i -= A1_pos_com
+impact_pos_com = (M_t * impact_pos_t + M_i * impact_pos_i) / (M_t + M_i)
+
+## Offset bodies such that the origin is the centre of mass
+impact_pos_t -= impact_pos_com
+impact_pos_i -= impact_pos_com
+
 
 # Centre of momentum
-A1_vel_com = (M_t * A1_vel_t + M_i * A1_vel_i) / (M_t + M_i)
-A1_vel_t -= A1_vel_com
-A1_vel_i -= A1_vel_com
+impact_vel_com = (M_t * impact_vel_t + M_i * impact_vel_i) / (M_t + M_i)
 
-print("New Target Positions:")
-print(A1_pos_t / R_earth, "R_earth")
-print("New Target Velocities")
-print(A1_vel_t, "m/s")
-
-print("\nNew Impactor Positions:")
-print(A1_pos_i / R_earth, "R_earth")
-print("New Impactor Velocities")
-print(A1_vel_i, "m/s\n\n")
+## Offset the velocities of the bodies such that the origin is the centre of momentum
+impact_vel_t -= impact_vel_com
+impact_vel_i -= impact_vel_com
 
 
+print("New Target Position:")
+print(impact_pos_t / R_earth, "R_earth")
+print("New Target Velocity:")
+print(impact_vel_t, "m/s")
 
-pos_t, vel_t, h_t, m_t, rho_t, p_t, u_t, matid_t, R_t = custom_woma.load_to_woma(
-    target_filepath
-)
-pos_i, vel_i, h_i, m_i, rho_i, p_i, u_i, matid_i, R_i = custom_woma.load_to_woma(
-    impactor_filepath
-)
+print("\nNew Impactor Position:")
+print(impact_pos_i / R_earth, "R_earth")
+print("New Impactor Velocity:")
+print(impact_vel_i, "m/s")
+print(np.linalg.norm(impact_vel_i), "m/s\n")
 
-#print(vel_t)
-
-rot_period_t = 20 	#hours
-ang_vel_t_scalar = 1 / (rot_period_t * 3600) 	#s^-1
-
-#Assumes that the z axis is along the post impact axis of rotation, so the pre-impact axis of rotation should be
-#~98 degrees from the z axis (towards y)
-#I might simplify this to 90 degrees and have the pre-impact spin be around the y axis
-
-rot_axis_ang_t = 98 #degrees
-
-#R_x = 	[1		0		0
-#	 0		cos(theta)	-sin(theta)
-#	 0		sin(theta)	cos(theta)]
-#
-#Initial rotation is around the z axis, we then rotate around the x axis
-# which pushes the axis of rotation from z towards y
-#
-#pos_t_T = pos_t.T
-#
-#dist_from_z = np.sqrt(pos_t_T[0]**2 + pos_t_T[1]**2)
-#angle_around_z = np.arctan2(pos_t_T[1], pos_t_T[0])
-#
-#print(dist_from_z[:, np.newaxis])
-#print(angle_around_z[:, np.newaxis])
-#
-#rot_vel_t_x = dist_from_z[:, np.newaxis] * np.cos(angle_around_z)[:, np.newaxis] * ang_vel_t_scalar
-#rot_vel_t_y = dist_from_z[:, np.newaxis] * np.sin(angle_around_z)[:, np.newaxis] * ang_vel_t_scalar
-#rot_vel_t_z = np.zeros(len(rot_vel_t_x))
-#
-#print(rot_vel_t_x)
-#print(rot_vel_t_y)
-#
-# TODO: Apply rotation matrix to rotate these about the x axis
-#
-#r w cos(phi) = v_x
-#r w sin(phi) = v_y
-
-mask_above_hemisphere_plane = np.where(A1_pos_t[:, 1] >= math.tan(180 - rot_axis_ang_t) , True, False)
-mask_below_hemisphere_plane = ~mask_above_hemisphere_plane
-
-rim_speed = ang_vel_t_scalar * R_t
-hemisphere_speed_offset = rim_speed / 4
+print("Centre of momentum", impact_vel_com, "m/s")
+print(np.linalg.norm(impact_vel_com), "m/s\n")
 
 
-pos_t += A1_pos_t
-vel_t[:] += A1_vel_t
-
-pre_rotation = true
-if pre_rotation:
-	vel_t[mask_above_hemisphere_plane, 0] += hemisphere_speed_offset
-	vel_t[mask_below_hemisphere_plane, 0] -= hemisphere_speed_offset
-
-pos_i += A1_pos_i
-vel_i[:] += A1_vel_i
+print("Impactor Approach Velocity Relative to Target:")
+print(np.linalg.norm(impact_vel_i) - np.linalg.norm(impact_vel_com), "m/s\n\n")
 
 
-with h5py.File("impact_files/IMPACT--{0}--{1}".format(target_filename[:-5], impactor_filename), "w") as f:
+## Load in particles from hdf5 files
+pos_t, vel_t, h_t, m_t, rho_t, p_t, u_t, matid_t, R_t = custom_woma.load_to_woma(target_filepath)
+pos_i, vel_i, h_i, m_i, rho_i, p_i, u_i, matid_i, R_i = custom_woma.load_to_woma(impactor_filepath)
+
+
+## Offset each bodies' particles' position and velocities to the right values
+pos_t += impact_pos_t
+vel_t[:] += impact_vel_t
+
+pos_i += impact_pos_i
+vel_i[:] += impact_vel_i
+
+
+## Save the impact configuration
+with h5py.File("impact_files/IMPACT--b{0}--{1}--{2}".format(B, target_filename[:-5], impactor_filename), "w") as f:
 	woma.save_particle_data(
         	f,
         	np.append(pos_t, pos_i, axis=0),

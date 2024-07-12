@@ -1,0 +1,42 @@
+planet = woma.Planet( 
+    name            = "1.5M Impactor v2", 
+    A1_mat_layer    = ["ANEOS_forsterite", "AQUA"], 
+    A1_T_rho_type   = ["entropy=2470", "adiabatic"], 
+    P_s             = 1e9, 
+    T_s             = 550, 
+    A1_M_layer      = [0.25935 * M_earth, 1.24065 * M_earth]
+)
+
+planet.gen_prof_L2_find_R_R1_given_M1_M2(R_min=1.3*R_earth, R_max=1.6*R_earth)
+
+
+
+
+
+
+
+
+Planet "1.5M Impactor v2":
+    M            = 8.9583e+24  kg  = 1.4999  M_earth
+    R            = 9.9976e+06  m  = 1.5692  R_earth
+    mat          = ["ANEOS_forsterite", "AQUA"]
+    mat_id       = [400, 304]
+    T_rho_type   = ["entropy=2470", "adiabatic"]
+    R_layer      = [0.66445, 1.5692]  R_earth
+    M_layer      = [0.25968, 1.2403]  M_earth
+    M_frac_layer = [0.17312, 0.82688]  M_tot
+    idx_layer    = [423, 999]
+    P_s          = 1e+09  Pa
+    T_s          = 550  K
+    rho_s        = 1115.3  kg m^-3
+    P_1          = 7.1482e+10  Pa
+    T_1          = 1960.3  K
+    rho_1        = 4568.4  kg m^-3
+    P_0          = 1.3494e+11  Pa
+    T_0          = 2174.7  K
+    rho_0        = 5289  kg m^-3
+    I_MR2        = 0.33798  M_tot*R_tot^2
+Particle resolution: 103157
+Name of particle file: impactor_1.5M
+
+num_particle = 109439

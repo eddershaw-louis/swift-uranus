@@ -1,3 +1,15 @@
+#################################################################
+#								#
+#								#
+#		Would a Mighty Smack Tilt Uranus?		#
+#								#
+#		Louis Eddershaw					#
+#								#
+#		2023/24						#
+#								#
+#								#
+#################################################################
+
 import woma
 import matplotlib.pyplot as plt
 import h5py

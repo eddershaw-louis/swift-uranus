@@ -1,24 +1,14 @@
-###############################################################################
-# This file is part of SWIFT.
-# Copyright (c) 2019 Jacob Kegerreis (jacob.kegerreis@durham.ac.uk)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published
-# by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
-# Plot the snapshots from the example giant impact on the proto-Earth, showing
-# the particles in a thin slice near z=0, coloured by their material.
+#################################################################
+#								#
+#								#
+#		Would a Mighty Smack Tilt Uranus?		#
+#								#
+#		Louis Eddershaw					#
+#								#
+#		2023/24						#
+#								#
+#								#
+#################################################################
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -90,7 +80,7 @@ else:
 
 #snapshot_name = os.path.abspath('.')[len(os.path.abspath('..')) + 1:]
 snapshot_path = "/data/cluster4/hd20558/simulations/{0}/output/{0}_*.hdf5".format(simulation_name)
-output_path = "simulations/{0}/analysis/".format(simulation_name)
+output_path = "simulations/{0}/".format(simulation_name)
 
 snapshots = glob.glob(snapshot_path)
 snapshots.sort()

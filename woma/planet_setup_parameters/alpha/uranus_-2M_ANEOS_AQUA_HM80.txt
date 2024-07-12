@@ -1,0 +1,60 @@
+planet = woma.Planet( 
+    name            = "3 Layer Uranus v2 For 2M Impactor", 
+    A1_mat_layer    = ["ANEOS_forsterite", "AQUA", "HM80_HHe"], 
+    A1_T_rho_type   = ["entropy=3600", "adiabatic", "adiabatic"], 
+    P_s             = 1e5, 
+    T_s             = 60, 
+    M               = 12.54 * M_earth, 
+    A1_R_layer      = [None, None, 3.98 * R_earth], 
+    I_MR2           = 0.179
+)
+
+planet.gen_prof_L3_find_R1_R2_given_M_R_I(R_1_min=0.8*R_earth, R_1_max=1*R_earth)
+
+
+
+
+
+Planet "3 Layer Uranus v2 For 2M Impactor":
+    M            = 7.4948e+25  kg  = 12.549  M_earth
+    R            = 2.5357e+07  m  = 3.98  R_earth
+    mat          = ["ANEOS_forsterite", "AQUA", "HM80_HHe"]
+    mat_id       = [400, 304, 200]
+    T_rho_type   = ["entropy=3600", "adiabatic", "adiabatic"]
+    R_layer      = [0.8964, 2.6294, 3.98]  R_earth
+    M_layer      = [1.0787, 10.031, 1.4397]  M_earth
+    M_frac_layer = [0.085959, 0.79931, 0.11473]  M_tot
+    idx_layer    = [225, 660, 999]
+    P_s          = 1e+05  Pa
+    T_s          = 60  K
+    rho_s        = 0.35445  kg m^-3
+    P_2          = 2.2211e+10  Pa
+    T_2          = 2890.6  K
+    rho_2        = 1781.3  kg m^-3
+    P_1          = 6.0501e+11  Pa
+    T_1          = 6269.2  K
+    rho_1        = 7762.2  kg m^-3
+    P_0          = 9.3469e+11  Pa
+    T_0          = 6917.7  K
+    rho_0        = 8870.9  kg m^-3
+    I_MR2        = 0.17897  M_tot*R_tot^2
+Particle resolution: 863067
+Name of particle file: uranus_-2M
+
+num_particle = 886230
+boxsize      = 9.6e+07
+mat_id       = 200 304 400
+
+Unit mass    = 1.00000e+03 g
+Unit length  = 1.00000e+02 cm
+Unit time    = 1.00000e+00 s
+
+Min, max values (file units):
+  pos = [2.3174e+07, 7.2391e+07,    2.3171e+07, 7.2393e+07,    2.3172e+07, 7.241e+07]
+  vel = [0, 0,    0, 0,    0, 0]
+  m = 8.4173e+19, 8.4352e+19
+  rho = 26.699, 8868.7
+  P = 7.3248e+07, 9.3421e+11
+  u = 5.2031e+06, 6.404e+07
+  h = 2.3867e+05, 1.6539e+06
+  s = 5.2031e+06, 6.404e+07

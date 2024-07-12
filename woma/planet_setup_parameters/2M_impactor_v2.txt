@@ -1,0 +1,54 @@
+planet = woma.Planet( 
+    name            = "2M Impactor v2", 
+    A1_mat_layer    = ["ANEOS_forsterite", "AQUA"], 
+    A1_T_rho_type   = ["entropy=2500", "adiabatic"], 
+    P_s             = 1e9, 
+    T_s             = 550, 
+    A1_M_layer      = [0.3458 * M_earth, 1.6542 * M_earth]
+)
+
+planet.gen_prof_L2_find_R_R1_given_M1_M2(R_min=1.4*R_earth, R_max=1.7*R_earth)
+
+
+
+
+Planet "2M Impactor v2":
+    M            = 1.1935e+25  kg  = 1.9983  M_earth
+    R            = 1.0763e+07  m  = 1.6893  R_earth
+    mat          = ["ANEOS_forsterite", "AQUA"]
+    mat_id       = [400, 304]
+    T_rho_type   = ["entropy=2500", "adiabatic"]
+    R_layer      = [0.7136, 1.6893]  R_earth
+    M_layer      = [0.34446, 1.6539]  M_earth
+    M_frac_layer = [0.17237, 0.82763]  M_tot
+    idx_layer    = [422, 999]
+    P_s          = 1e+09  Pa
+    T_s          = 550  K
+    rho_s        = 1115.3  kg m^-3
+    P_1          = 9.6242e+10  Pa
+    T_1          = 2089.9  K
+    rho_1        = 4879.7  kg m^-3
+    P_0          = 1.8038e+11  Pa
+    T_0          = 2345.6  K
+    rho_0        = 5682.4  kg m^-3
+    I_MR2        = 0.3352  M_tot*R_tot^2
+Particle resolution: 137435
+Name of particle file: 2M_impactor
+
+num_particle = 153063
+boxsize      = 9.6e+07
+mat_id       = 304 400
+
+Unit mass    = 1.00000e+03 g
+Unit length  = 1.00000e+02 cm
+Unit time    = 1.00000e+00 s
+
+Min, max values (file units):
+  pos = [3.7207e+07, 5.8358e+07,    3.7206e+07, 5.8358e+07,    3.7206e+07, 5.8359e+07]
+  vel = [0, 0,    0, 0,    0, 0]
+  m = 7.7697e+19, 7.7878e+19
+  rho = 1272.8, 5680.8
+  P = 2.5837e+09, 1.8018e+11
+  u = 1.7325e+06, 1.2971e+07
+  h = 2.6963e+05, 4.4416e+05
+  s = 1.7325e+06, 1.2971e+07
